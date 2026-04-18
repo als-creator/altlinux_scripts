@@ -1,9 +1,9 @@
 # altlinux_scripts  
-Просто повседневные скрипты  
 
 autoinstall_byedpi_altlinux.sh  
-Настраивает из сизифа beydpi по адресу 127.0.0.1:14228  
+Настраивает из сизифа beydpi по адресу 127.0.0.1:14228 socks5  
 Поменять настройки можно в /etc/sysconfig/byedpi  
+Для настройки прокси браузера можно использовать расширения FoxyProxy, SmartProxy или Proxy SwitchyOmega.__
 
 setup_alt_update.sh  
 Добавляет в планировщик задание для фонового обновления системы каждый день в 12:00 и в 22:00  
