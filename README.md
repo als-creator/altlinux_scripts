@@ -1,9 +1,9 @@
 # altlinux_scripts  
 
 autoinstall_byedpi_altlinux.sh  
-Настраивает из сизифа beydpi по адресу 127.0.0.1:14228 socks5  
+Настраивает из сизифа byedpi по адресу 127.0.0.1:14228 socks5  
 Поменять настройки можно в /etc/sysconfig/byedpi  
-Для настройки прокси браузера можно использовать расширения FoxyProxy, SmartProxy или Proxy SwitchyOmega.__
+Для настройки прокси браузера можно использовать расширения FoxyProxy, SmartProxy или Proxy SwitchyOmega.
 
 autoinstall_zapret_altlinux.sh  
 Клонирует из репы последнюю версию zapret с настройками и списком доменов, создает юнит-файл, запускает сервис  
