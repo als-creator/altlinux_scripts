@@ -1,31 +1,66 @@
-# Добавление фонового автообновления по крону в 12.00 + 22.00 + автоочистка в фоне по субботам в 11.30 с выводом лога на рабочий стол
 #!/bin/bash
 set -e
-# Заменить путь, чтобы не было ошибок
-LOGFILE="/home/als/Рабочий стол/alt_log.log"
-TEMP_CRONFILE="/tmp/temp_crontab.txt"
 
-# Создать файл лога, если он не существует
+# Сохранить имя пользователя ДО su
+if [ "$EUID" -ne 0 ]; then
+    CURRENT_USER=$(whoami)
+    echo "Текущий пользователь: $CURRENT_USER"
+    echo "Требуются права root. Запускаем как root (пароль один раз)."
+    exec su -c "CURRENT_USER=$CURRENT_USER $0 $*"
+fi
+
+# Root режим
+CURRENT_USER="${CURRENT_USER:-als}"
+USER_HOME="/home/$CURRENT_USER"
+
+# Проверка папки Desktop
+if [ -d "$USER_HOME/Desktop" ]; then
+    DESKTOP_DIR="$USER_HOME/Desktop"
+elif [ -d "$USER_HOME/Рабочий стол" ]; then
+    DESKTOP_DIR="$USER_HOME/Рабочий стол"
+else
+    echo "Ошибка: не найдена папка Desktop или Рабочий стол в $USER_HOME!"
+    exit 1
+fi
+
+LOGFILE="$DESKTOP_DIR/alt_log.log"
+TEMP_CRONFILE="/tmp/temp_crontab_$$.txt"
+
+echo "Домашняя директория: $USER_HOME"
+echo "Лог: $LOGFILE"
+
+# Права лог-файла
 touch "$LOGFILE"
+chmod 666 "$LOGFILE"
 
-# Переменные обновлений, путь нужно поправить для своего пользователя
-CRON_DAILY_UPDATE='0 12 * * * root epm update && epm full-upgrade -y >> "/home/als/Рабочий стол/alt_log.log" 2>&1'
-CRON_NIGHTLY_UPDATE='0 22 * * * root epm update && epm full-upgrade -y >> "/home/als/Рабочий стол/alt_log.log" 2>&1'
-CRON_CLEAN_CACHE='30 11 * * 6 root apt-get clean && apt-get autoclean && apt-get autoremove -y && flatpak uninstall --unused -y && journalctl --vacuum-time=1w >> "/home/als/Рабочий стол/alt_log.log" 2>&1'
+# Cron задания
+CRON_DAILY_UPDATE="0 12 * * * root epm update && epm full-upgrade -y >> \"$LOGFILE\" 2>&1"
+CRON_NIGHTLY_UPDATE="0 22 * * * root epm update && epm full-upgrade -y >> \"$LOGFILE\" 2>&1"
+CRON_CLEAN_CACHE="30 11 * * 6 root apt-get clean && apt-get autoclean && apt-get autoremove -y && flatpak uninstall --unused -y && journalctl --vacuum-time=1w >> \"$LOGFILE\" 2>&1"
 
-# Создать временный файл crontab
-echo "Создаём временный файл crontab..." | tee -a "$LOGFILE"
+# Создать временный файл
 {
     echo "$CRON_DAILY_UPDATE"
     echo "$CRON_NIGHTLY_UPDATE"
     echo "$CRON_CLEAN_CACHE"
 } > "$TEMP_CRONFILE"
 
-# Вывод временного файла в crontab
-echo "Обновляем системный crontab. Пожалуйста, введите пароль root." | tee -a "$LOGFILE"
-su -c "cat $TEMP_CRONFILE >> /etc/crontab"
+echo "Cron задания:"
+cat "$TEMP_CRONFILE"
 
-# Удаление временного файла
-rm "$TEMP_CRONFILE"
+# Выполнить root команды
+echo "Обновляем /etc/crontab..." | tee -a "$LOGFILE"
+cat "$TEMP_CRONFILE" >> /etc/crontab
+rm -f "$TEMP_CRONFILE"
 
-echo "Готово! Правила добавлены в системный crontab." | tee -a "$LOGFILE"
+echo "Готово! Правила добавлены." | tee -a "$LOGFILE"
+echo "Расписание:" | tee -a "$LOGFILE"
+echo "   • 12:00 - epm update/full-upgrade" | tee -a "$LOGFILE"
+echo "   • 22:00 - epm update/full-upgrade" | tee -a "$LOGFILE"
+echo "   • Сб 11:30 - очистка" | tee -a "$LOGFILE"
+
+echo "/etc/crontab (конец):"
+tail -5 /etc/crontab
+
+echo "Лог: $(ls -la "$LOGFILE")" | tee -a "$LOGFILE"
+echo "Тест записи: $(date)" >> "$LOGFILE"
