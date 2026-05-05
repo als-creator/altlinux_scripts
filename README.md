@@ -20,3 +20,7 @@ altlinux_postinstall_script.sh
 
 autoinstall_yggdrasil_altlinux.sh  
 Автонастройка yggdrasil из реп, добавление пиров для .
+
+update_sisyphus_mirrors.sh  
+Перезаписывает стандартный лист с репами от altlinux.ru, добавляя для сизифа репы mirror.mephi.ru + download.basealt.ru + mirror.truenetwork.ru
+По дефолту раскомментированы mirror.mephi.ru
