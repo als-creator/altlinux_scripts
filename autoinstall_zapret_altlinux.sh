@@ -16,28 +16,158 @@ rm -rf "$TMPDIR"
 log_ok "/opt/zapret установлен"
 
 log_ok "Установка зависимостей"
-sudo apt-get update >/dev/null 2>&1 || true
-sudo apt-get install -y libnetfilter_queue git sudo >/dev/null 2>&1 || {
-    log_ok "Зависимости установлены с ошибками или пропущены, продолжаем..."
+
+# Функция для проверки доступности пакетного менеджера
+check_package_manager() {
+    if command -v apt-get &> /dev/null; then
+        echo "apt"
+    elif command -v dnf &> /dev/null; then
+        echo "dnf"
+    elif command -v yum &> /dev/null; then
+        echo "yum"
+    elif command -v pacman &> /dev/null; then
+        echo "pacman"
+    elif command -v apk &> /dev/null; then
+        echo "apk"
+    elif command -v zypper &> /dev/null; then
+        echo "zypper"
+    elif command -v xbps-install &> /dev/null; then
+        echo "xbps"
+    else
+        echo "неизвестный пакетник"
+    fi
 }
+
+PM=$(check_package_manager)
+
+# Функция для установки пакетов в зависимости от пакетного менеджера
+install_dependencies() {
+    case "$PM" in
+        apt)
+            log_ok "Обнаружен пакетный менеджер: apt-get"
+            sudo apt-get update >/dev/null 2>&1 || true
+            if sudo apt-get install -y libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (apt)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (apt), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        dnf)
+            log_ok "Обнаружен пакетный менеджер: dnf"
+            sudo dnf check-update >/dev/null 2>&1 || true
+            if sudo dnf install -y libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (dnf)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (dnf), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        yum)
+            log_ok "Обнаружен пакетный менеджер: yum"
+            sudo yum check-update >/dev/null 2>&1 || true
+            if sudo yum install -y libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (yum)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (yum), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        pacman)
+            log_ok "Обнаружен пакетный менеджер: pacman"
+            sudo pacman -Sy >/dev/null 2>&1 || true
+            if sudo pacman -S --noconfirm libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (pacman)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (pacman), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        apk)
+            log_ok "Обнаружен пакетный менеджер: apk"
+            sudo apk update >/dev/null 2>&1 || true
+            if sudo apk add libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (apk)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (apk), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        zypper)
+            log_ok "Обнаружен пакетный менеджер: zypper"
+            sudo zypper refresh >/dev/null 2>&1 || true
+            if sudo zypper install -y libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (zypper)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (zypper), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        xbps)
+            log_ok "Обнаружен пакетный менеджер: xbps-install"
+            sudo xbps-install -Sy >/dev/null 2>&1 || true
+            if sudo xbps-install -y libnetfilter_queue git >/dev/null 2>&1; then
+                log_ok "Зависимости успешно установлены (xbps)"
+                return 0
+            else
+                log_ok "Установка завершена с предупреждениями (xbps), продолжаем..."
+                return 0
+            fi
+            ;;
+
+        *)
+            log_ok "Пакетный менеджер не определен, пропуск установки зависимостей"
+            return 0
+            ;;
+    esac
+}
+
+install_dependencies
+# Скрипт продолжает выполнение здесь, независимо от результата установки
 
 sudo tee /etc/systemd/system/zapret.service > /dev/null <<'EOF'
 [Unit]
+# Запускать после подключения к сети
 After=network-online.target
+# Мягкая зависимость — попытаться запустить сеть, но не требовать её
 Wants=network-online.target
 
 [Service]
+# Тип сервиса — process создаёт дочерние процессы и сервис остаётся активным
 Type=forking
-Restart=no
+# Перезапускать сервис при ошибке (ненулевой выход)
+Restart=on-failure
+# Ждать 10 секунд перед перезапуском
+RestartSec=10s
+# Максимум 3 перезапуска за 60 секунд (защита от бесконечных перезапусков)
+StartLimitInterval=60s
+# Количество разрешённых перезапусков в интервале
+StartLimitBurst=3
+# Таймаут на запуск и остановку сервиса
 TimeoutSec=30sec
-IgnoreSIGPIPE=no
-KillMode=none
+# Убивать только основной процесс, не дочерние
+KillMode=process
+# Не пытаться автоматически определять PID основного процесса
 GuessMainPID=no
-RemainAfterExit=no
+# Команда для запуска сервиса
 ExecStart=/opt/zapret/init.d/sysv/zapret start
+# Команда для остановки сервиса
 ExecStop=/opt/zapret/init.d/sysv/zapret stop
 
 [Install]
+# Включить сервис при загрузке системы в режиме multi-user (обычный режим)
 WantedBy=multi-user.target
 
 EOF
@@ -68,6 +198,8 @@ cat << 'EOF'
   Требуется при: использовании режимов NFQUEUE, TPWS, TPWS+
   Проверка режима: cat /opt/zapret/config | grep -i mode
   Если режим содержит: NFQUEUE, TPWS или TPWS+ - зависимость необходима
+  Скрипт производит автоустановку зависимостей через системный пакетник.
+  Если пакетника нет в списке, то можно установить libnetfilter_queue вручную.
 
 ════════════════════════════════════════════════════════════════════
                       УПРАВЛЕНИЕ СЕРВИСОМ
@@ -122,6 +254,7 @@ sudo systemctl restart zapret.service после редактирования.
 ════════════════════════════════════════════════════════════════════
                     УДАЛЕНИЕ ZAPRET
 ════════════════════════════════════════════════════════════════════
+
 Если zapret больше не требуется, выполните следующие команды:
 
 Отключение автозагрузки:
@@ -138,7 +271,6 @@ sudo rm -rf /opt/zapret
 
 Удаление зависимостей (опционально):
 sudo apt-get remove libnetfilter_queue
-
 
 ════════════════════════════════════════════════════════════════════
 
