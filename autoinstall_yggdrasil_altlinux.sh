@@ -8,11 +8,11 @@ su -c 'epm install yggdrasil' -l
 # Генерация базового конфига
 su -c 'yggdrasil -genconf > /etc/yggdrasil.conf' -l
 
-echo "Добавление публичных пиеров из Europe/Russia..."
+echo "Добавление публичных пиров из Europe/Russia..."
 
 URL="https://raw.githubusercontent.com/yggdrasil-network/public-peers/refs/heads/master/europe/russia.md"
 
-# Исправленный парсер
+# Парсер пиров
 PEERS=$(curl -sL "$URL" | \
     grep -Eo '(tcp|tls|quic|ws|wss|socks)://[^[:space:]<>`|*]*' | \
     awk '{gsub(/"/, ""); print "  \""$0"\","}')
@@ -48,5 +48,5 @@ in_peers {
 
 sudo mv "$TMP_CONF" /etc/yggdrasil.conf
 
-echo "Peers для России добавлены в /etc/yggdrasil.conf."
+echo "Пиры для России добавлены в /etc/yggdrasil.conf."
 su -c 'systemctl enable --now yggdrasil' -l
