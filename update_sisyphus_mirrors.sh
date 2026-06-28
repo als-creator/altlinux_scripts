@@ -1,3 +1,4 @@
+# Список зеркал для сизифа
 #!/bin/bash
 set -euo pipefail
 

@@ -14,7 +14,7 @@ altlinux_postinstall_script.sh
 Диски монтируются мои, если у вас таких дисков не существует, то после ребута система не загрузится, не забывайте редактировать скрипт под свои нужды.
 
 autoinstall_yggdrasil_altlinux.sh  
-Автонастройка yggdrasil из реп, добавление пиров для .
+Автонастройка yggdrasil из реп, добавление пиров для РФ.
 
 update_sisyphus_mirrors.sh  
 Перезаписывает стандартный лист с репами от altlinux.ru, добавляя для сизифа репы mirror.mephi.ru + download.basealt.ru + mirror.truenetwork.ru
