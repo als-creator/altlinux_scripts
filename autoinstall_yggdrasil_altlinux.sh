@@ -1,3 +1,4 @@
+# Настройка yggdrasil с пирами для РФ
 #!/bin/bash
 
 set -euo pipefail

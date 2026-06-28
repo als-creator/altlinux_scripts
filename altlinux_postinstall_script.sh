@@ -59,54 +59,20 @@ echo "Система обновлена через apt-get."
 echo "=== 4) Установка основных пакетов через apt-get ==="
 
 su -c 'apt-get install -y \
-    i586-xorg-drv-radeon \
-    grub-customizer \
-    conky \
-    git \
-    fish \
-    whois \
-    alt-gaming \
-    codium \
-    neovim \
-    rustdesk \
-    qmmp \
-    smplayer \
-    smplayer-skins \
-    smplayer-themes \
-    gearlever \
-    obs-studio \
-    fastfetch \
+    ncdu \
     guake \
     zram-generator \
     micro \
+    neovim \
     ranger \
-    wgetpaste \
-    pyradio \
-    radiotray-ng \
-    konsole \
-    nvtop \
     mc \
-    galculator \
-    gnome-disk-utility \
-    kdiskmark \
-    qdiskinfo \
-    qbittorrent \
-    virtualbox \
-    steam \
-    handbrake-gtk \
-    foliate \
-    kdenlive \
-    flameshot \
-    kate \
-    kdeconnect \
-    man-pages-ru \
-    nmap \
+    fastfetch \
+    fish \
+    git \
+    lazygit \
     uv \
-    wireshark-qt \
-    filezilla \
-    putty \
+    direnv \
     mtr \
-    traceroute \
     bat \
     lsd \
     fd \
@@ -114,35 +80,60 @@ su -c 'apt-get install -y \
     eza \
     fzf \
     zoxide \
-    thefuck \
-    direnv \
     nikto \
     aircrack-ng \
+    zenmap \
+    nmap \
+    wireshark-qt \
+    putty \
+    filezilla \
+    whois \
+    codium \
     yandex-browser-stable \
+    rustdesk \
+    qmmp \
+    smplayer \
+    smplayer-skins \
+    smplayer-themes \
+    gvfs \
+    ffmpegthumbnailer \
+    gearlever \
+    obs-studio \
+    wgetpaste \
+    xclip \
+    yt-dlp \
+    deno \
+    pyradio \
+    radiotray-ng \
+    galculator \
+    gnome-disk-utility \
+    kdiskmark \
+    qdiskinfo \
+    qbittorrent \
+    virtualbox \
+    steam \
+    alt-gaming \
+    handbrake-gtk \
+    flameshot \
+    kdenlive \
+    kate \
+    konsole \
+    kdeconnect \
     aichat \
     qimgv \
     qpdfview \
-    zenmap \
     blueman \
+    conky \
     gnome-disk-usage \
     gnome-themes-standard \
+    icon-theme-kora-pgrey \
     xfce4-weather-plugin \
     xfce4-notification-plugin \
     xfce4-clipman-plugin \
-    icon-theme-kora-pgrey \
-    gvfs \
-    ffmpegthumbnailer \
     vcmi \
-    github-cli \
-    snapd \
-    flatpak-repo-flathub \
+    grub-customizer \
     fonts-ttf-jetbrains-mono-nl \
-    fonts-ttf-fira-code-nerd \
-    myconnector \
-    lightdm \
-    lightdm-gtk-greeter \
-    lightdm-gtk-greeter-settings \
-    megasync' -l
+    fonts-ttf-fira-code-nerd' -l
 
 echo "Основные пакеты установлены через apt-get."
 
