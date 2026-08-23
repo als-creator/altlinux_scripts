@@ -23,19 +23,19 @@ echo "=== 2) Добавляем диски по LABEL в /etc/fstab (без ду
 fstab="/etc/fstab"
 
 # Создаём точки монтирования
-mkdir -p /run/media/als/Data
-mkdir -p /run/media/als/Work
+mkdir -p /mnt/Data
+mkdir -p /mnt/Work
 
 # Проверяем, что строки с LABEL=Data и LABEL=Work ещё не присутствуют
 if ! grep -q '^[[:space:]]*LABEL=Data' "$fstab"; then
-    echo "LABEL=Data  /run/media/als/Data  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Data  0 0" >> "$fstab"
+    echo "LABEL=Data  /mnt/Data  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Data  0 0" >> "$fstab"
     echo "Добавлена запись в fstab: LABEL=Data"
 else
     echo "Запись для LABEL=Data уже есть в fstab, не дублируем."
 fi
 
 if ! grep -q '^[[:space:]]*LABEL=Work' "$fstab"; then
-    echo "LABEL=Work  /run/media/als/Work  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Work  0 0" >> "$fstab"
+    echo "LABEL=Work  /mnt/Work  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Work  0 0" >> "$fstab"
     echo "Добавлена запись в fstab: LABEL=Work"
 else
     echo "Запись для LABEL=Work уже есть в fstab, не дублируем."
@@ -60,7 +60,6 @@ echo "=== 4) Установка основных пакетов через apt-g
 
 su -c 'apt-get install -y \
     ncdu \
-    guake \
     zram-generator \
     micro \
     neovim \
@@ -147,7 +146,7 @@ echo "Система обновлена через epm (update + full-upgrade + 
 
 echo "=== 6) Установка дополнительных пакетов через epm play ==="
 
-su -c 'epm play anydesk assistant rudesktop localsend obsidian' -l
+su -c 'epm play anydesk assistant rudesktop localsend' -l
 
 echo "Дополнительные пакеты установлены через epm play."
 
