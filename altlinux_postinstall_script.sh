@@ -20,27 +20,31 @@ echo "Sudo включён для группы wheel. Проверка полит
 
 echo "=== 2) Добавляем диски по LABEL в /etc/fstab (без дублирования) ==="
 
-fstab="/etc/fstab"
+# Точки монтирования — права root через su (на ALT нет sudo)
+su -c 'mkdir -p /mnt/Data /mnt/Work' -l
 
-# Создаём точки монтирования
-mkdir -p /mnt/Data
-mkdir -p /mnt/Work
+# Новые строки собираем во временный файл, затем дописываем в fstab через su
+FSTAB_ADD="$(mktemp)"
+trap 'rm -f "$FSTAB_ADD"' EXIT
 
 # Проверяем, что строки с LABEL=Data и LABEL=Work ещё не присутствуют
-if ! grep -q '^[[:space:]]*LABEL=Data' "$fstab"; then
-    echo "LABEL=Data  /mnt/Data  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Data  0 0" >> "$fstab"
+if ! grep -q '^[[:space:]]*LABEL=Data' /etc/fstab; then
+    echo "LABEL=Data  /mnt/Data  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Data  0 0" >> "$FSTAB_ADD"
     echo "Добавлена запись в fstab: LABEL=Data"
 else
     echo "Запись для LABEL=Data уже есть в fstab, не дублируем."
 fi
 
-if ! grep -q '^[[:space:]]*LABEL=Work' "$fstab"; then
-    echo "LABEL=Work  /mnt/Work  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Work  0 0" >> "$fstab"
+if ! grep -q '^[[:space:]]*LABEL=Work' /etc/fstab; then
+    echo "LABEL=Work  /mnt/Work  auto  nosuid,nodev,nofail,x-gvfs-show,x-gvfs-name=Work  0 0" >> "$FSTAB_ADD"
     echo "Добавлена запись в fstab: LABEL=Work"
 else
     echo "Запись для LABEL=Work уже есть в fstab, не дублируем."
 fi
 
+if [ -s "$FSTAB_ADD" ]; then
+    su -c "tee -a /etc/fstab < '$FSTAB_ADD' >/dev/null" -l
+fi
 echo "fstab: диски Data и Work добавлены (по LABEL), дублирование отсутствует."
 
 echo "=== 3) Полное обновление системы через apt-get ==="

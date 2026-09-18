@@ -1,5 +1,5 @@
-# Настройка yggdrasil с пирами для РФ
 #!/bin/bash
+# Настройка yggdrasil с пирами для РФ
 
 set -euo pipefail
 
@@ -25,8 +25,8 @@ fi
 
 TMP_CONF="/tmp/yggdrasil.conf.tmp"
 
-# Вставка в Peers
-sudo awk -v p="$PEERS" '
+# Вставка в Peers: читаем конфиг под root (su), парсим и пишем во временный файл
+su -c 'cat /etc/yggdrasil.conf' -l | awk -v p="$PEERS" '
 /^[[:space:]]*Peers:[[:space:]]*\[.*\]/ {
     sub(/\[.*\]/, "[\n" p "\n]")
     print
@@ -45,9 +45,10 @@ in_peers {
     next
 }
 { print }
-' /etc/yggdrasil.conf > "$TMP_CONF"
+' > "$TMP_CONF"
 
-sudo mv "$TMP_CONF" /etc/yggdrasil.conf
+# Запись конфига на место — права root через su (на ALT нет sudo)
+su -c "mv '$TMP_CONF' /etc/yggdrasil.conf" -l
 
 echo "Пиры для России добавлены в /etc/yggdrasil.conf."
 su -c 'systemctl enable --now yggdrasil' -l

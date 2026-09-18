@@ -1,8 +1,13 @@
-# Список зеркал для сизифа
 #!/bin/bash
+# Список зеркал для Sisyphus
 set -euo pipefail
 
-su -c 'cat > /etc/apt/sources.list.d/alt.list <<'"'"'EOF'"'"'
+# Запись в /etc/apt требует прав root. На ALT Linux нет sudo — файл
+# собираем во временном каталоге, затем ставим на место через su.
+TMP_LIST="$(mktemp)"
+trap 'rm -f "$TMP_LIST"' EXIT
+
+cat > "$TMP_LIST" <<'EOF'
 # ftp.altlinux.org (ALT Linux, Moscow)
 
 # ALT Linux Sisyphus
@@ -29,6 +34,7 @@ su -c 'cat > /etc/apt/sources.list.d/alt.list <<'"'"'EOF'"'"'
 rpm [alt] http://mirror.mephi.ru/ALTLinux Sisyphus/x86_64 classic
 rpm [alt] http://mirror.mephi.ru/ALTLinux Sisyphus/x86_64-i586 classic
 rpm [alt] http://mirror.mephi.ru/ALTLinux Sisyphus/noarch classic
+EOF
 
-
-EOF'
+su -c "install -m 644 '$TMP_LIST' /etc/apt/sources.list.d/alt.list" -l
+echo "Зеркала Sisyphus записаны в /etc/apt/sources.list.d/alt.list"
