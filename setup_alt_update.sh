@@ -2,12 +2,12 @@
 #!/bin/bash
 set -e
 
-# Сохранить имя пользователя ДО su
+# Сохранить имя пользователя ДО su (на ALT нет sudo — только su -)
 if [ "$EUID" -ne 0 ]; then
     CURRENT_USER=$(whoami)
     echo "Текущий пользователь: $CURRENT_USER"
-    echo "Требуются права root. Запускаем как root (пароль один раз)."
-    exec su -c "CURRENT_USER=$CURRENT_USER $0 $*"
+    echo "Требуются права root. Запускаем как root через su - (пароль один раз)."
+    exec su -c "CURRENT_USER=$CURRENT_USER sh '$0' $*"
 fi
 
 # Root режим
